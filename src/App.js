@@ -1,175 +1,144 @@
-import React, { useState } from 'react';
-import { Search, ShieldAlert, Gauge, FileText, Clock, Star, X, Check, ChevronRight, Package } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Gauge, Clock, FileText, Shield, AlertTriangle, CheckCircle, X, ExternalLink } from 'lucide-react';
 
-const PfasIdFyApp = () => {
+function App() {
+  // State management
   const [activeView, setActiveView] = useState('dashboard');
-  const [showEmailCapture, setShowEmailCapture] = useState(false);
-  const [userEmail, setUserEmail] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [emailSubmitted, setEmailSubmitted] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [scannedProducts, setScannedProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [scannedProducts, setScannedProducts] = useState([]);
+  const [email, setEmail] = useState('');
+  const [showEmailCapture, setShowEmailCapture] = useState(false);
 
-  // Sample products for demo
-  const products = [
+  // Mock product database
+  const productDatabase = [
     {
       id: 1,
-      name: "McDonald's French Fries Container",
-      brand: "McDonald's",
-      category: "Food Packaging",
-      hasPfas: true,
-      riskScore: 75,
-      description: "PFAS detected in grease-resistant packaging",
-      alternatives: ["Eat in restaurant with real plates", "Bring your own container"]
+      name: 'Non-stick Pan Set',
+      brand: 'Generic Brand',
+      category: 'Cookware',
+      pfasRisk: 'high',
+      pfasScore: 85,
+      description: 'Traditional non-stick coating contains PFAS chemicals',
+      alternatives: ['Ceramic cookware', 'Cast iron', 'Stainless steel']
     },
     {
       id: 2,
-      name: "Teflon Non-stick Pan",
-      brand: "DuPont",
-      category: "Cookware",
-      hasPfas: true,
-      riskScore: 90,
-      description: "Contains PTFE coating that can release PFAS when overheated",
-      alternatives: ["Cast iron skillet", "Stainless steel pan", "Ceramic cookware"]
+      name: 'Waterproof Jacket',
+      brand: 'OutdoorGear',
+      category: 'Clothing',
+      pfasRisk: 'medium',
+      pfasScore: 60,
+      description: 'DWR coating may contain PFAS',
+      alternatives: ['Wax-coated jackets', 'Natural fiber rain gear']
     },
     {
       id: 3,
-      name: "Pyrex Glass Container",
-      brand: "Pyrex",
-      category: "Food Storage",
-      hasPfas: false,
-      riskScore: 0,
-      description: "PFAS-free glass storage solution",
+      name: 'Food Storage Container',
+      brand: 'SafeStore',
+      category: 'Food Storage',
+      pfasRisk: 'low',
+      pfasScore: 15,
+      description: 'PFAS-free materials used',
       alternatives: []
-    },
-    {
-      id: 4,
-      name: "Oral-B Glide Dental Floss",
-      brand: "Oral-B",
-      category: "Personal Care",
-      hasPfas: true,
-      riskScore: 60,
-      description: "Contains PTFE for smooth gliding",
-      alternatives: ["Silk floss", "Bamboo floss", "Unwaxed floss"]
     }
   ];
 
-  const handleEmailSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    
-    const FORM_ID = '1FAIpQLSe9UuK-Icl0k6l9pIjEDfzJ_u8LfswiLKe5s6FDsLHwy824gg';
-    const FIELD_ID = 'entry.127497103';
-    
-    const formData = new FormData();
-    formData.append(FIELD_ID, userEmail);
-    
-    try {
-      await fetch(
-        `https://docs.google.com/forms/d/e/${FORM_ID}/formResponse`,
-        {
-          method: 'POST',
-          mode: 'no-cors',
-          body: formData
-        }
-      );
-      
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setIsSubmitting(false);
-      setEmailSubmitted(true);
-      
-      setTimeout(() => {
-        setShowEmailCapture(false);
-        setEmailSubmitted(false);
-        setUserEmail('');
-        window.open('https://drive.google.com/file/d/187rn5oNKB_tz61V29aQl_JilpVUIutf6/view?usp=sharing', '_blank');
-      }, 2000);
-      
-    } catch (error) {
-      console.error('Error:', error);
-      setIsSubmitting(false);
-      setEmailSubmitted(true);
-    }
-  };
-
-  const handleProductClick = (product) => {
-    setSelectedProduct(product);
-    if (!scannedProducts.find(p => p.id === product.id)) {
-      setScannedProducts([...scannedProducts, product]);
-    }
-  };
-
-  const filteredProducts = products.filter(p => 
-    p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.brand.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const getRiskColor = (score) => {
-    if (score === 0) return '#22c55e';
-    if (score < 50) return '#eab308';
-    return '#ef4444';
-  };
-
+  // Styles
   const styles = {
     container: {
       minHeight: '100vh',
-      background: 'linear-gradient(to bottom right, #1e293b, #7c3aed, #1e293b)',
-      color: 'white'
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      fontFamily: 'system-ui, -apple-system, sans-serif'
     },
     header: {
-      backgroundColor: 'rgba(0,0,0,0.2)',
-      borderBottom: '1px solid rgba(255,255,255,0.1)',
-      backdropFilter: 'blur(12px)',
-      padding: '1rem'
+      background: 'rgba(255, 255, 255, 0.1)',
+      backdropFilter: 'blur(10px)',
+      border: '1px solid rgba(255, 255, 255, 0.2)',
+      padding: '1rem 2rem',
+      color: 'white'
     },
-    button: {
-      padding: '0.5rem 1rem',
-      background: 'linear-gradient(to right, #9333ea, #ec4899)',
-      color: 'white',
-      border: 'none',
-      borderRadius: '0.5rem',
-      cursor: 'pointer',
-      fontWeight: '500'
-    },
-    navButton: {
-      padding: '0.5rem 1rem',
-      background: 'rgba(255,255,255,0.1)',
-      color: 'white',
-      border: '1px solid rgba(255,255,255,0.2)',
-      borderRadius: '0.5rem',
-      cursor: 'pointer',
-      marginRight: '0.5rem'
-    },
-    activeNavButton: {
-      background: 'rgba(147, 51, 234, 0.3)',
-      borderColor: '#9333ea'
+    main: {
+      padding: '2rem',
+      maxWidth: '1200px',
+      margin: '0 auto'
     },
     card: {
-      background: 'rgba(255,255,255,0.05)',
-      border: '1px solid rgba(255,255,255,0.1)',
-      borderRadius: '1rem',
-      padding: '1.5rem',
-      marginBottom: '1rem'
-    },
-    modal: {
-      position: 'fixed',
-      inset: 0,
-      background: 'rgba(0,0,0,0.5)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '1rem',
-      zIndex: 50
-    },
-    modalContent: {
-      background: 'rgba(17, 24, 39, 0.95)',
+      background: 'rgba(255, 255, 255, 0.1)',
+      backdropFilter: 'blur(10px)',
       borderRadius: '1rem',
       padding: '2rem',
-      maxWidth: '28rem',
+      border: '1px solid rgba(255, 255, 255, 0.2)',
+      color: 'white',
+      marginBottom: '1rem'
+    },
+    button: {
+      background: 'rgba(147, 51, 234, 0.8)',
+      color: 'white',
+      border: 'none',
+      padding: '0.75rem 1.5rem',
+      borderRadius: '0.5rem',
+      cursor: 'pointer',
+      fontWeight: '600',
+      fontSize: '1rem'
+    },
+    input: {
       width: '100%',
-      border: '1px solid rgba(255,255,255,0.1)'
+      padding: '0.75rem',
+      borderRadius: '0.5rem',
+      border: '1px solid rgba(255, 255, 255, 0.3)',
+      background: 'rgba(255, 255, 255, 0.1)',
+      color: 'white',
+      fontSize: '1rem'
+    }
+  };
+
+  // Risk color helper
+  const getRiskColor = (risk) => {
+    switch(risk) {
+      case 'high': return '#ef4444';
+      case 'medium': return '#f59e0b';
+      case 'low': return '#10b981';
+      default: return '#6b7280';
+    }
+  };
+
+  // Risk icon helper
+  const getRiskIcon = (risk) => {
+    switch(risk) {
+      case 'high': return <AlertTriangle size={20} color="#ef4444" />;
+      case 'medium': return <Shield size={20} color="#f59e0b" />;
+      case 'low': return <CheckCircle size={20} color="#10b981" />;
+      default: return <Shield size={20} color="#6b7280" />;
+    }
+  };
+
+  // Search products
+  const searchResults = productDatabase.filter(product =>
+    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    product.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    product.category.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Handle email submission
+  const handleEmailSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const formData = new FormData();
+      formData.append('entry.127497103', email);
+      
+      await fetch('https://docs.google.com/forms/d/e/1FAIpQLSe9UuK-Icl0k6l9pIjEDfzJ_u8LfswiLKe5s6FDsLHwy824gg/formResponse', {
+        method: 'POST',
+        mode: 'no-cors',
+        body: formData
+      });
+      
+      setShowEmailCapture(false);
+      setEmail('');
+      alert('Thanks for subscribing! We\'ll keep you updated on PFAS safety.');
+    } catch (error) {
+      console.error('Error submitting email:', error);
+      alert('Thanks for subscribing!');
     }
   };
 
@@ -177,262 +146,402 @@ const PfasIdFyApp = () => {
     <div style={styles.container}>
       {/* Header */}
       <header style={styles.header}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <ShieldAlert size={40} color="#c084fc" />
-              <div>
-                <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', margin: 0 }}>PFAS ID-FY</h1>
-                <p style={{ fontSize: '0.75rem', color: '#9ca3af', margin: 0 }}>
-                  Scan • Learn • Protect
-                </p>
-              </div>
-            </div>
-            <button onClick={() => setShowEmailCapture(true)} style={styles.button}>
-              Get Free PFAS Guide
-            </button>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Shield size={32} color="#c084fc" />
+            <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', margin: 0 }}>
+              PFAS ID-FY
+            </h1>
           </div>
-          
-          {/* Navigation */}
-          <nav>
-            <button 
-              onClick={() => setActiveView('dashboard')} 
-              style={{...styles.navButton, ...(activeView === 'dashboard' ? styles.activeNavButton : {})}}
-            >
-              <Gauge size={16} style={{ display: 'inline', marginRight: '0.25rem' }} />
-              Dashboard
-            </button>
-            <button 
-              onClick={() => setActiveView('products')} 
-              style={{...styles.navButton, ...(activeView === 'products' ? styles.activeNavButton : {})}}
-            >
-              <Search size={16} style={{ display: 'inline', marginRight: '0.25rem' }} />
-              Products
-            </button>
-            <button 
-              onClick={() => setActiveView('history')} 
-              style={{...styles.navButton, ...(activeView === 'history' ? styles.activeNavButton : {})}}
-            >
-              <Clock size={16} style={{ display: 'inline', marginRight: '0.25rem' }} />
-              History
-            </button>
-          </nav>
+          <button 
+            onClick={() => setShowEmailCapture(true)}
+            style={styles.button}
+          >
+            Get Alerts
+          </button>
         </div>
+
+        {/* Navigation */}
+        <nav style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
+          <button 
+            onClick={() => setActiveView('dashboard')} 
+            style={{
+              padding: '0.5rem 1rem',
+              background: activeView === 'dashboard' ? 'rgba(147, 51, 234, 0.5)' : 'rgba(255,255,255,0.2)',
+              color: 'white',
+              border: `2px solid ${activeView === 'dashboard' ? '#c084fc' : 'rgba(255,255,255,0.3)'}`,
+              borderRadius: '0.5rem',
+              cursor: 'pointer',
+              fontWeight: '600',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.25rem'
+            }}
+          >
+            <Gauge size={16} />
+            Dashboard
+          </button>
+          
+          <button 
+            onClick={() => setActiveView('products')} 
+            style={{
+              padding: '0.5rem 1rem',
+              background: activeView === 'products' ? 'rgba(147, 51, 234, 0.5)' : 'rgba(255,255,255,0.2)',
+              color: 'white',
+              border: `2px solid ${activeView === 'products' ? '#c084fc' : 'rgba(255,255,255,0.3)'}`,
+              borderRadius: '0.5rem',
+              cursor: 'pointer',
+              fontWeight: '600',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.25rem'
+            }}
+          >
+            <Search size={16} />
+            Products
+          </button>
+          
+          <button 
+            onClick={() => setActiveView('history')} 
+            style={{
+              padding: '0.5rem 1rem',
+              background: activeView === 'history' ? 'rgba(147, 51, 234, 0.5)' : 'rgba(255,255,255,0.2)',
+              color: 'white',
+              border: `2px solid ${activeView === 'history' ? '#c084fc' : 'rgba(255,255,255,0.3)'}`,
+              borderRadius: '0.5rem',
+              cursor: 'pointer',
+              fontWeight: '600',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.25rem'
+            }}
+          >
+            <Clock size={16} />
+            History
+          </button>
+          
+          <button 
+            onClick={() => setActiveView('blog')} 
+            style={{
+              padding: '0.5rem 1rem',
+              background: activeView === 'blog' ? 'rgba(147, 51, 234, 0.5)' : 'rgba(255,255,255,0.2)',
+              color: 'white',
+              border: `2px solid ${activeView === 'blog' ? '#c084fc' : 'rgba(255,255,255,0.3)'}`,
+              borderRadius: '0.5rem',
+              cursor: 'pointer',
+              fontWeight: '600',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.25rem'
+            }}
+          >
+            <FileText size={16} />
+            Blog
+          </button>
+        </nav>
       </header>
 
-      {/* Main Content */}
-      <main style={{ maxWidth: '1280px', margin: '0 auto', padding: '2rem 1rem' }}>
+      <main style={styles.main}>
         {/* Dashboard View */}
         {activeView === 'dashboard' && (
           <div>
-            <h2 style={{ fontSize: '2rem', fontWeight: 'bold', textAlign: 'center', marginBottom: '2rem' }}>
-              Your PFAS Risk Dashboard
+            <h2 style={{ fontSize: '2rem', fontWeight: 'bold', textAlign: 'center', marginBottom: '2rem', color: 'white' }}>
+              Protect Your Family from Forever Chemicals
             </h2>
             
+            {/* Risk Meter */}
             <div style={styles.card}>
-              <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Overall Risk Score</h3>
-              <div style={{ fontSize: '3rem', fontWeight: 'bold', textAlign: 'center', color: getRiskColor(0) }}>
-                {scannedProducts.length > 0 
-                  ? Math.round(scannedProducts.reduce((sum, p) => sum + p.riskScore, 0) / scannedProducts.length)
-                  : 0
-                }
+              <h3 style={{ marginBottom: '1rem' }}>Your PFAS Risk Level</h3>
+              <div style={{ 
+                width: '100%', 
+                height: '20px', 
+                background: 'rgba(255,255,255,0.2)', 
+                borderRadius: '10px',
+                position: 'relative',
+                marginBottom: '1rem'
+              }}>
+                <div style={{
+                  width: '60%',
+                  height: '100%',
+                  background: 'linear-gradient(90deg, #10b981, #f59e0b, #ef4444)',
+                  borderRadius: '10px'
+                }}></div>
               </div>
-              <p style={{ textAlign: 'center', color: '#9ca3af' }}>
-                {scannedProducts.length === 0 
-                  ? 'Start scanning products to see your risk level'
-                  : `Based on ${scannedProducts.length} scanned products`
-                }
+              <p style={{ color: '#f59e0b', fontWeight: '600' }}>Medium Risk</p>
+              <p style={{ color: '#9ca3af' }}>
+                Based on {scannedProducts.length} products scanned. Scan more products for a complete assessment.
               </p>
             </div>
 
-            <button 
-              onClick={() => setActiveView('products')} 
-              style={{...styles.button, width: '100%', padding: '1rem', fontSize: '1.125rem'}}
-            >
-              <Search size={20} style={{ display: 'inline', marginRight: '0.5rem' }} />
-              Scan Your First Product
-            </button>
+            {/* Quick Stats */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+              <div style={styles.card}>
+                <h4>Products Scanned</h4>
+                <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#c084fc' }}>{scannedProducts.length}</p>
+              </div>
+              <div style={styles.card}>
+                <h4>High-Risk Items</h4>
+                <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#ef4444' }}>
+                  {scannedProducts.filter(p => p.pfasRisk === 'high').length}
+                </p>
+              </div>
+              <div style={styles.card}>
+                <h4>Safe Alternatives Found</h4>
+                <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#10b981' }}>
+                  {scannedProducts.reduce((acc, p) => acc + (p.alternatives?.length || 0), 0)}
+                </p>
+              </div>
+            </div>
+
+            {/* CTA */}
+            <div style={{ ...styles.card, textAlign: 'center' }}>
+              <h3>Start Scanning Your Products</h3>
+              <p style={{ color: '#9ca3af', marginBottom: '1rem' }}>
+                Discover which everyday items contain PFAS and find safer alternatives.
+              </p>
+              <button 
+                onClick={() => setActiveView('products')}
+                style={styles.button}
+              >
+                Scan Products Now
+              </button>
+            </div>
           </div>
         )}
 
         {/* Products View */}
         {activeView === 'products' && (
           <div>
-            <h2 style={{ fontSize: '2rem', fontWeight: 'bold', textAlign: 'center', marginBottom: '2rem' }}>
+            <h2 style={{ fontSize: '2rem', fontWeight: 'bold', textAlign: 'center', marginBottom: '2rem', color: 'white' }}>
               Product Search
             </h2>
             
-            <input
-              type="text"
-              placeholder="Search products..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                background: 'rgba(255,255,255,0.1)',
-                border: '1px solid rgba(255,255,255,0.2)',
-                borderRadius: '0.5rem',
-                color: 'white',
-                fontSize: '1rem',
-                marginBottom: '1.5rem'
-              }}
-            />
+            {/* Search Bar */}
+            <div style={styles.card}>
+              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                <input
+                  type="text"
+                  placeholder="Search products (e.g., 'non-stick pan', 'waterproof jacket')"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  style={{ ...styles.input, flex: 1 }}
+                />
+                <Search size={20} color="white" />
+              </div>
+            </div>
 
-            <div>
-              {filteredProducts.map(product => (
-                <div 
-                  key={product.id} 
-                  style={{...styles.card, cursor: 'pointer'}}
-                  onClick={() => handleProductClick(product)}
-                >
+            {/* Search Results */}
+            <div style={{ display: 'grid', gap: '1rem' }}>
+              {searchResults.map(product => (
+                <div key={product.id} style={styles.card}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-                    <div>
-                      <h3 style={{ fontSize: '1.25rem', marginBottom: '0.25rem' }}>{product.name}</h3>
-                      <p style={{ color: '#9ca3af', marginBottom: '0.5rem' }}>{product.brand} • {product.category}</p>
-                      <p style={{ fontSize: '0.875rem' }}>{product.description}</p>
-                    </div>
-                    <div style={{ textAlign: 'center' }}>
-                      <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: getRiskColor(product.riskScore) }}>
-                        {product.riskScore}
+                    <div style={{ flex: 1 }}>
+                      <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        {getRiskIcon(product.pfasRisk)}
+                        {product.name}
+                      </h3>
+                      <p style={{ color: '#9ca3af' }}>{product.brand} • {product.category}</p>
+                      <p style={{ margin: '0.5rem 0' }}>{product.description}</p>
+                      
+                      {/* PFAS Score */}
+                      <div style={{ margin: '1rem 0' }}>
+                        <p style={{ fontSize: '0.875rem', color: '#9ca3af' }}>PFAS Risk Score</p>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <div style={{
+                            width: '100px',
+                            height: '8px',
+                            background: 'rgba(255,255,255,0.2)',
+                            borderRadius: '4px'
+                          }}>
+                            <div style={{
+                              width: `${product.pfasScore}%`,
+                              height: '100%',
+                              background: getRiskColor(product.pfasRisk),
+                              borderRadius: '4px'
+                            }}></div>
+                          </div>
+                          <span style={{ fontWeight: '600', color: getRiskColor(product.pfasRisk) }}>
+                            {product.pfasScore}/100
+                          </span>
+                        </div>
                       </div>
-                      <div style={{ fontSize: '0.75rem', color: '#9ca3af' }}>Risk Score</div>
+
+                      {/* Alternatives */}
+                      {product.alternatives.length > 0 && (
+                        <div>
+                          <p style={{ fontWeight: '600', color: '#10b981' }}>Safer Alternatives:</p>
+                          <ul style={{ margin: '0.5rem 0', paddingLeft: '1rem' }}>
+                            {product.alternatives.map((alt, index) => (
+                              <li key={index} style={{ color: '#9ca3af' }}>{alt}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </div>
+                    
+                    <button
+                      onClick={() => {
+                        setScannedProducts(prev => [...prev, product]);
+                        setSelectedProduct(product);
+                      }}
+                      style={{ ...styles.button, marginLeft: '1rem' }}
+                    >
+                      Add to History
+                    </button>
                   </div>
                 </div>
               ))}
             </div>
+
+            {searchTerm && searchResults.length === 0 && (
+              <div style={styles.card}>
+                <p style={{ textAlign: 'center', color: '#9ca3af' }}>
+                  No products found. Try searching for "cookware", "clothing", or "food storage".
+                </p>
+              </div>
+            )}
           </div>
         )}
 
         {/* History View */}
         {activeView === 'history' && (
           <div>
-            <h2 style={{ fontSize: '2rem', fontWeight: 'bold', textAlign: 'center', marginBottom: '2rem' }}>
-              Scan History
+            <h2 style={{ fontSize: '2rem', fontWeight: 'bold', textAlign: 'center', marginBottom: '2rem', color: 'white' }}>
+              Scanned Products History
             </h2>
             
             {scannedProducts.length === 0 ? (
-              <p style={{ textAlign: 'center', color: '#9ca3af' }}>No products scanned yet</p>
-            ) : (
-              scannedProducts.map(product => (
-                <div key={product.id} style={styles.card}>
-                  <h3>{product.name}</h3>
-                  <p style={{ color: '#9ca3af' }}>{product.brand} • Risk Score: {product.riskScore}</p>
+              <div style={styles.card}>
+                <p style={{ textAlign: 'center', color: '#9ca3af' }}>
+                  No products scanned yet. Visit the Products tab to start scanning!
+                </p>
+                <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+                  <button 
+                    onClick={() => setActiveView('products')}
+                    style={styles.button}
+                  >
+                    Start Scanning
+                  </button>
                 </div>
-              ))
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gap: '1rem' }}>
+                {scannedProducts.map((product, index) => (
+                  <div key={index} style={styles.card}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div>
+                        <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          {getRiskIcon(product.pfasRisk)}
+                          {product.name}
+                        </h3>
+                        <p style={{ color: '#9ca3af' }}>{product.brand}</p>
+                        <p style={{ 
+                          color: getRiskColor(product.pfasRisk),
+                          fontWeight: '600',
+                          textTransform: 'uppercase',
+                          fontSize: '0.875rem'
+                        }}>
+                          {product.pfasRisk} Risk
+                        </p>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: getRiskColor(product.pfasRisk) }}>
+                          {product.pfasScore}
+                        </p>
+                        <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Risk Score</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
         )}
-      </main>
 
-      {/* Product Detail Modal */}
-      {selectedProduct && (
-        <div style={styles.modal} onClick={() => setSelectedProduct(null)}>
-          <div style={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
-              <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{selectedProduct.name}</h2>
-              <button 
-                onClick={() => setSelectedProduct(null)}
-                style={{ background: 'none', border: 'none', color: '#9ca3af', cursor: 'pointer' }}
+        {/* Blog View */}
+        {activeView === 'blog' && (
+          <div>
+            <h2 style={{ fontSize: '2rem', fontWeight: 'bold', textAlign: 'center', marginBottom: '2rem', color: 'white' }}>
+              PFAS Insights Blog
+            </h2>
+            
+            <div style={styles.card}>
+              <h3>Coming Soon!</h3>
+              <p style={{ color: '#9ca3af' }}>
+                Expert articles about PFAS, health impacts, and safer alternatives.
+              </p>
+              <div style={{ marginTop: '1rem' }}>
+                <p style={{ color: '#c084fc', fontWeight: '600' }}>Upcoming topics:</p>
+                <ul style={{ color: '#9ca3af', marginTop: '0.5rem' }}>
+                  <li>The Hidden PFAS in Your Kitchen</li>
+                  <li>PFAS-Free Alternatives for Every Room</li>
+                  <li>Understanding PFAS Health Risks</li>
+                  <li>How to Read Product Labels for PFAS</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Email Capture Modal */}
+        {showEmailCapture && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0,0,0,0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000
+          }}>
+            <div style={{
+              ...styles.card,
+              maxWidth: '500px',
+              margin: '2rem',
+              position: 'relative'
+            }}>
+              <button
+                onClick={() => setShowEmailCapture(false)}
+                style={{
+                  position: 'absolute',
+                  top: '1rem',
+                  right: '1rem',
+                  background: 'none',
+                  border: 'none',
+                  color: 'white',
+                  cursor: 'pointer'
+                }}
               >
                 <X size={24} />
               </button>
+              
+              <h3 style={{ marginBottom: '1rem' }}>Stay Informed About PFAS</h3>
+              <p style={{ color: '#9ca3af', marginBottom: '1.5rem' }}>
+                Get alerts about new PFAS discoveries and product recalls.
+              </p>
+              
+              <form onSubmit={handleEmailSubmit}>
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  style={{ ...styles.input, marginBottom: '1rem' }}
+                  required
+                />
+                <button type="submit" style={{ ...styles.button, width: '100%' }}>
+                  Subscribe to Alerts
+                </button>
+              </form>
             </div>
-            
-            <p style={{ color: '#9ca3af', marginBottom: '1rem' }}>
-              {selectedProduct.brand} • {selectedProduct.category}
-            </p>
-            
-            <div style={{ marginBottom: '1.5rem' }}>
-              <div style={{ fontSize: '2rem', fontWeight: 'bold', color: getRiskColor(selectedProduct.riskScore) }}>
-                Risk Score: {selectedProduct.riskScore}
-              </div>
-              <p style={{ marginTop: '0.5rem' }}>{selectedProduct.description}</p>
-            </div>
-
-            {selectedProduct.alternatives.length > 0 && (
-              <div>
-                <h3 style={{ fontSize: '1.125rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>
-                  Safer Alternatives:
-                </h3>
-                <ul style={{ listStyle: 'none', padding: 0 }}>
-                  {selectedProduct.alternatives.map((alt, index) => (
-                    <li key={index} style={{ marginBottom: '0.5rem' }}>
-                      <ChevronRight size={16} style={{ display: 'inline', marginRight: '0.5rem', color: '#22c55e' }} />
-                      {alt}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
           </div>
-        </div>
-      )}
-
-      {/* Email Modal */}
-      {showEmailCapture && (
-        <div style={styles.modal}>
-          <div style={styles.modalContent}>
-            {!emailSubmitted ? (
-              <div>
-                <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-                  <FileText size={48} color="#c084fc" style={{ marginBottom: '1rem' }} />
-                  <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>
-                    Get Your Free PFAS Guide
-                  </h2>
-                  <p style={{ color: '#d1d5db' }}>
-                    "The Shocking 20: Hidden PFAS Products in Your Home"
-                  </p>
-                </div>
-                
-                <form onSubmit={handleEmailSubmit}>
-                  <input
-                    type="email"
-                    value={userEmail}
-                    onChange={(e) => setUserEmail(e.target.value)}
-                    placeholder="your@email.com"
-                    required
-                    disabled={isSubmitting}
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem',
-                      background: 'rgba(255,255,255,0.1)',
-                      border: '1px solid rgba(255,255,255,0.2)',
-                      borderRadius: '0.5rem',
-                      color: 'white',
-                      marginBottom: '1rem',
-                      fontSize: '1rem'
-                    }}
-                  />
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    style={{
-                      ...styles.button,
-                      width: '100%',
-                      padding: '0.75rem',
-                      opacity: isSubmitting ? 0.7 : 1
-                    }}
-                  >
-                    {isSubmitting ? 'Processing...' : 'Get Instant Access'}
-                  </button>
-                </form>
-              </div>
-            ) : (
-              <div style={{ textAlign: 'center' }}>
-                <Check size={48} color="#22c55e" style={{ marginBottom: '1rem' }} />
-                <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>
-                  Success!
-                </h2>
-                <p>Your guide is downloading...</p>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+        )}
+      </main>
     </div>
   );
-};
+}
 
-export default PfasIdFyApp;
+export default App;
