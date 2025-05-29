@@ -1,0 +1,210 @@
+# Context continuation for Claude - PFAS ID-FY Project
+
+# Context for Claude - PFAS ID-FY Project (Updated May 2025)
+
+## Project Overview
+Building PFAS ID-FY (pfas-free.app), a comprehensive PFAS education and product alternative platform that combines a free web app with monetized digital products through Stan Store integration. The app serves as the most trusted, transparent resource for PFAS product information.
+
+## Current Database State (CRITICAL)
+- **Total Products**: 66 (as of this session)
+- **Database Composition**:
+  - Fast Food Packaging: 48 products
+  - Cookware: 3 products
+  - Cosmetics: 2 products
+  - Baby Products: 2 products
+  - Personal Care: 2 products
+  - Clothing: 3 products
+  - Home Products: 2 products
+  - Microwave Popcorn: 4 products
+- **PFAS Status**: 60 products with PFAS, 6 PFAS-free
+- **Conflicting Data**: 3 products with documented conflicts
+
+## Database Building Progress
+1. **Original Database**: 5 products (FF001-FF003, CW001, CM001, BP001)
+2. **First Expansion**: Added microwave popcorn & pizza products (FF004-FF007, BP003)
+3. **Second Expansion**: Added 10+ researched products across categories (FF008-FF010, PC001-PC002, CL001-CL003, HP001-HP002)
+4. **CSV Import**: Added 36 products from CSV file with new IDs (FF100-FF135)
+5. **Conflict Resolution**: Implemented trust-building approach for conflicting data
+
+## Trust & Transparency Principles
+- **Always show conflicting test results** with "TRUST ALERT" notes
+- **Conservative approach**: If any test shows PFAS, mark as PFAS-present
+- **Include all evidence sources** with dates
+- **Adjust confidence ratings** based on data consistency
+- **Document regional differences** (US vs Europe)
+- **Clear notes** explaining uncertainties
+
+## Technical Architecture
+- **Frontend:** React (single component for MVP)
+- **Hosting:** Vercel with custom domain
+- **Database:** JSON array in productDatabase variable
+- **Email:** Google Forms ? Google Sheets
+- **Monetization:** Stan Store for digital products
+- **Styling:** Inline styles (no CSS frameworks)
+
+## Key Resources
+- **Domain:** pfas-free.app
+- **GitHub:** https://github.com/vkpe13/pfas-idfy
+- **Google Form ID:** 1FAIpQLSe9UuK-Icl0k6l9pIjEDfzJ_u8LfswiLKe5s6FDsLHwy824gg
+- **Google Form Field ID:** entry.127497103
+- **PDF Guide:** https://drive.google.com/file/d/187rn5oNKB_tz61V29aQl_JilpVUIutf6/view?usp=sharing
+
+## Product Data Structure
+Each product in the database includes:
+```javascript
+{
+  id: "FF###", // Unique identifier
+  name: "Product Name",
+  brand: "Brand Name",
+  category: "Category", // Fast Food Packaging, Cookware, etc.
+  subcategory: "Subcategory", // Optional
+  pfasScore: 0-100, // Higher = more PFAS risk
+  risk: 'low'|'medium'|'high',
+  image: '??', // Emoji representation
+  pfas_present: true|false,
+  pfas_compounds: ["PFOA", "PFOS", etc.],
+  concentration: "150-300 ppm", // When available
+  confidence_rating: "High"|"Medium"|"Low",
+  evidence: "Summary of evidence type",
+  evidence_sources: [{
+    name: "Source Name",
+    url: "URL",
+    date: "YYYY-MM-DD"
+  }],
+  testing_methodology: "Method used",
+  riskFactors: ["Array of risk factors"],
+  alternatives: [{
+    name: "Alternative Product",
+    brand: "Brand",
+    price: "$X-Y",
+    link: "affiliate link",
+    badge: "Certification",
+    verification: "How verified"
+  }],
+  notes: "Additional context, especially conflicts",
+  certified: "Certification if PFAS-free", // Optional
+  stanStoreGuide: "guide-name" // Links to Stan Store products
+}
+
+## ID Assignment System
+
+FF001-FF099: Original products and manual additions
+FF100-FF135: CSV import batch 1 (36 products)
+FF136+: Available for future additions
+PC### for Personal Care
+CL### for Clothing
+HP### for Home Products
+CW### for Cookware
+CM### for Cosmetics
+BP### for Baby Products
+
+## Conflict Resolution Approach
+When data conflicts exist:
+
+- Keep both data points in evidence_sources
+- Set primary result to most recent/reliable
+- Lower confidence_rating
+- Add detailed notes explaining conflict
+- Use "TRUST ALERT" prefix in notes
+- Adjust pfasScore to middle range
+
+## Stan Store Products
+Integrated guides throughout database:
+
+- "fast-food-safety-guide" ($12)
+- "pfas-free-kitchen-guide" ($19)
+- "pfas-free-beauty-guide" ($15)
+- "safe-baby-products-guide" ($24)
+- "pfas-free-personal-care-guide" ($19)
+- "pfas-free-outdoor-gear-guide" ($24)
+- "pfas-free-home-guide" ($29)
+
+## Next Steps for Database Building
+## Priority Categories to Add:
+
+- More Fast Food Chains: In-N-Out, Carl's Jr., Jack in the Box, Shake Shack
+- Personal Care: Shampoos, deodorants, sunscreens, makeup removers
+- Children's Products: Car seats, strollers, toys, school supplies
+- Food Storage: Tupperware, Ziploc bags, aluminum foil, parchment paper
+- Textiles: Furniture, mattresses, bedding, curtains
+- Electronics: Phone cases, laptop bags (water-resistant coatings)
+
+## Data Sources to Mine:
+
+- Mamavation testing reports
+- Consumer Reports PFAS investigations
+- EPA PFAS testing data
+- State regulatory databases (CA, NY, ME)
+- Academic studies from Silent Spring Institute
+- European REACH database
+- Class action lawsuit documents
+
+## Features to Implement:
+
+- User contribution system with credits
+- Enhanced search with filters
+- Barcode scanning capability
+- Regional settings (US/Europe differences but optional. not required ffor MVP)
+- Product history tracking
+- Share functionality for specific products
+
+## Important Implementation Notes
+## When Adding New Products:
+
+- Check for existing products to avoid true duplicates
+- If conflicting data exists, add as separate entry with new ID
+- Always include at least 2 evidence sources when possible
+- Calculate pfasScore based on concentration and confidence
+- Include practical alternatives with shopping links
+- Add appropriate stanStoreGuide reference
+
+## Risk Level Guidelines:
+
+- High Risk: Concentration >150 ppm OR contains multiple PFAS OR high exposure route
+- Medium Risk: Concentration 50-150 ppm OR single PFAS compound
+- Low Risk: Concentration <50 ppm OR PFAS-free with low confidence
+
+## Confidence Rating Guidelines:
+
+- High: Multiple independent sources agree, recent testing, clear methodology
+- Medium: Single authoritative source OR older testing OR some uncertainty
+- Low: Conflicting results OR manufacturer claim only OR indirect evidence
+
+## Current Session Summary
+## In this session, we:
+
+- Researched and added 10+ products across multiple categories
+- Imported and processed 36 products from CSV file
+- Implemented conflict resolution for Subway, Dunkin', and KFC products
+- Established trust-building principles for handling conflicting data
+- Created comprehensive database structure with 66 total products
+
+##For New Chat Sessions
+##When starting a new conversation:
+
+- Reference this context file
+- Current database has 66 products (last ID used: FF135)
+- Next priority: Continue building database with more categories
+- Maintain trust principles: Show all data, note conflicts, be transparent
+- Use established ID system for new products
+- Keep Stan Store integration in mind for monetization
+
+## Critical Files to Reference
+
+- This updated CONTEXT.md file
+- App.js with current database of 66 products
+- CSV file: "IDProductNameBrandTypePFASCompoundsConcentrationConfidenceEvidenceTypeTestingMethodKeySourcesNotes 3.csv"
+- Stan Store strategy document
+- Original authoritative PFAS data sources document
+
+
+# Database Building Best Practices
+
+- Quality over Quantity: Better to have 100 well-researched products than 1000 poorly documented ones
+- Always Verify: Cross-reference multiple sources
+- Document Everything: Future you (or new chat) will thank you
+- User First: Every decision should help users make safer choices
+- Monetization Mindful: Each category should link to relevant Stan Store guides
+
+## Remember
+PFAS ID-FY's mission is to be the most trusted resource for PFAS information. Every product entry should reinforce that trust through transparen
